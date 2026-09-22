@@ -21,6 +21,8 @@ st.divider()
 
 # ------------------------------------------------------------
 # 데이터 불러오기 함수
+# - @st.cache_data 를 사용하면 데이터를 매번 새로 불러오지 않고
+#   한 번만 불러온 뒤 재사용해서 앱이 더 빠르게 동작해요.
 # ------------------------------------------------------------
 @st.cache_data
 def load_data():
@@ -40,7 +42,8 @@ st.write(
 )
 
 # ------------------------------------------------------------
-# 큰 숫자 카드 네 개
+# 큰 숫자 카드 네 개 (전체 사람 수, 열 개수, stroke=1인 사람 수, 비율)
+# st.metric 을 사용하면 큰 숫자 카드를 쉽게 만들 수 있어요.
 # ------------------------------------------------------------
 total_people = len(df)
 total_columns = df.shape[1]
@@ -69,17 +72,20 @@ st.divider()
 st.header("📋 열(컬럼) 정보 표")
 st.write("아래 표의 **'우리말 뜻'** 칸은 비어 있습니다. 교재를 참고해서 직접 채워보세요!")
 
+# 각 열의 값 종류를 요약하는 함수
 def get_value_summary(col):
     unique_vals = df[col].dropna().unique()
+    # 값 종류가 너무 많으면 (예: 연속형 숫자) 개수만 표시
     if df[col].dtype in ["int64", "float64"] and len(unique_vals) > 10:
         return f"숫자형 (예: {round(df[col].min(), 1)} ~ {round(df[col].max(), 1)})"
     else:
+        # 값 종류가 적으면 실제 값들을 나열
         sorted_vals = sorted(unique_vals, key=lambda x: str(x))
         return ", ".join(str(v) for v in sorted_vals)
 
 column_info = pd.DataFrame({
     "열 이름": df.columns,
-    "우리말 뜻": ["" for _ in df.columns],
+    "우리말 뜻": ["" for _ in df.columns],   # 학생이 직접 채울 빈 칸
     "값의 종류": [get_value_summary(col) for col in df.columns],
     "빈 값 개수": [df[col].isnull().sum() for col in df.columns]
 })
@@ -89,7 +95,7 @@ st.dataframe(column_info, use_container_width=True, hide_index=True)
 st.divider()
 
 # ------------------------------------------------------------
-# 데이터 처음 다섯 줄
+# 데이터 처음 다섯 줄 그대로 보여주기
 # ------------------------------------------------------------
 st.header("🔍 데이터 미리보기 (상위 5줄)")
 st.dataframe(df.head(5), use_container_width=True)
@@ -97,7 +103,7 @@ st.dataframe(df.head(5), use_container_width=True)
 st.divider()
 
 # ------------------------------------------------------------
-# 데이터 출처
+# 데이터 출처 (학생이 직접 작성)
 # ------------------------------------------------------------
 st.header("📚 데이터 출처")
 st.info("여기에 교재를 참고하여 데이터 출처를 직접 작성해보세요.")
